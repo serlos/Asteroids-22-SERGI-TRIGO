@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class PlayerMovement : MonoBehaviour
     Animator anim;
     public float speed = 5;
     public float RotationSpeed = 10;
+    public GameObject bala;
+    public GameObject Boquilla;
 
     void Start()
     {
@@ -35,5 +38,19 @@ public class PlayerMovement : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         transform.eulerAngles += new Vector3(0, 0, horizontal * RotationSpeed * Time.deltaTime);
        
+        if (Input.GetButtonDown("Jump")) //estamos instanciamos la bala para que darle al espacio dispare, ponemos Jump prq es el standard del espacio el getbutton sale la bala todo el rato si no dejamos de pulsar por eso utilizamos el DOWN porq asi solo sale UNA bala cuando le damos al espacio
+        {
+            GameObject temp = Instantiate(bala, Boquilla.transform.position, transform.rotation); //le pasamos la posicion de la nave guardamos la instantiate en la variable temp para poder hacer cositas con ella, en el momento que se instancia la bala se guarda en la variable temporal y podemos modificar cosas de la bala.
+            Destroy(temp, 1f);
+         
+        }
     }
-}
+
+        public void Muerte()
+    {
+        //Destroy(gameObject);
+    }
+
+   
+    }
+
