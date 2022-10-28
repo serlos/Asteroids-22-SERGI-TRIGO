@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
     public float RotationSpeed = 10;
     public GameObject bala;
     public GameObject Boquilla;
-    public float tiempoBalaAleatoria = 1.0f;
+    public float tiempoBalaAleatoria = 0.5f;
     private float tiempoReal;
     public GameObject particulasmuerte;
     public UIManager GameOver;
