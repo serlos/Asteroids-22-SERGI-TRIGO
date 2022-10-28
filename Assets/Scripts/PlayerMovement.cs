@@ -7,26 +7,46 @@ public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D RigidBody;
     Animator anim;
+    CircleCollider2D collider;
+    SpriteRenderer sprite;
     public float speed = 5;
     public float RotationSpeed = 10;
     public GameObject bala;
     public GameObject Boquilla;
+    public float tiempoBalaAleatoria = 1.0f;
+    private float tiempoReal;
+    public GameObject particulasmuerte;
+    public UIManager GameOver;
+    public bool controlparticulas;
+
+    
 
     void Start()
     {
-        RigidBody = GetComponent<Rigidbody2D>();     /*el getcomponent busca el componente que hemos añadido en unity busca componente y lo iguala para poder trabajar con el*/
+        RigidBody = GetComponent<Rigidbody2D>();     
         anim = GetComponent<Animator>();
+        tiempoReal = tiempoBalaAleatoria;
+        collider = GetComponent<CircleCollider2D>();    
+        sprite = GetComponent<SpriteRenderer>();
     }
 
    
     
     void Update()
+
     {
+        tiempoReal -= Time.deltaTime;
+        if(tiempoReal <= 0.0f && (gameObject.activeSelf && sprite.enabled)) 
+        { 
+            DisparoAleatorio();
+            tiempoReal = tiempoBalaAleatoria;
+
+
+        }
+
         float vertical = Input.GetAxis("Vertical");
         if(vertical > 0)
         {
-            /*reconoce el movimiento por la formula del movimiento que es mi posicion * la velocidad * por cuadrar los frames para todos los PCs*/
-            /*el transform.up mira la posicion de donde apunta en este caso el eje vertical se sigue manteniendo la formalua del movimiento y el transform.up es Vector3*/
             RigidBody.AddForce(transform.up * vertical * speed * Time.deltaTime);
             anim.SetBool("Impulsing", true);
         }
@@ -38,19 +58,93 @@ public class PlayerMovement : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         transform.eulerAngles += new Vector3(0, 0, horizontal * RotationSpeed * Time.deltaTime);
        
-        if (Input.GetButtonDown("Jump")) //estamos instanciamos la bala para que darle al espacio dispare, ponemos Jump prq es el standard del espacio el getbutton sale la bala todo el rato si no dejamos de pulsar por eso utilizamos el DOWN porq asi solo sale UNA bala cuando le damos al espacio
+        if (Input.GetButtonDown("Jump") && (gameObject.activeSelf && sprite.enabled)) 
         {
-            GameObject temp = Instantiate(bala, Boquilla.transform.position, transform.rotation); //le pasamos la posicion de la nave guardamos la instantiate en la variable temp para poder hacer cositas con ella, en el momento que se instancia la bala se guarda en la variable temporal y podemos modificar cosas de la bala.
-            Destroy(temp, 1f);
-         
+            
+            if(GameManager.instance.municion > 0) 
+            {
+                GameObject temp = Instantiate(bala, Boquilla.transform.position, transform.rotation);
+                GameManager.instance.municion -= 1;
+                GameManager.instance.listaBalas.Add(temp);
+            }
+
+        }
+        if (!GameManager.instance.ComprobarBalasMoviendose() && GameManager.instance.municion <= 0)
+        {
+            Muerte();
+
         }
     }
-
-        public void Muerte()
+    public void DisparoAleatorio() 
     {
-        //Destroy(gameObject);
+        Vector3 rotacion = new Vector3(0, 0, Random.Range(0f, 360f));
+        GameObject temp = Instantiate(bala, Boquilla.transform.position, Quaternion.Euler(rotacion));
+        temp.GetComponent<BulletController>().soyAleatorio = true;
+
     }
 
-   
+    public void Muerte()
+    {
+       
+
+        if (GameManager.instance.vida == 0 && controlparticulas)
+        {
+            GameObject temp = Instantiate(particulasmuerte, transform.position, transform.rotation);
+            Destroy(temp, 2.5f);
+            gameObject.SetActive(false);
+            controlparticulas=false;
+
+
+        }
+        else if (GameManager.instance.vida > 0)
+        {
+            GameObject temp = Instantiate(particulasmuerte, transform.position, transform.rotation);
+            Destroy(temp, 2.5f);
+            StartCoroutine(Respawn_Coroutine());
+
+        }
+        else
+        {
+            
+        
+        }
+           
+
+
     }
+    public void restart() 
+    {
+        transform.position = new Vector3(0, 0, 0);
+        RigidBody.velocity = new Vector2(0, 0);
+        gameObject.SetActive(true);
+
+
+    }
+
+    IEnumerator Respawn_Coroutine()
+    {
+        collider.enabled = false;
+        sprite.enabled = false;
+        GameManager.instance.vida -= 1;
+        GameManager.instance.municion = 15;
+        yield return new WaitForSeconds(2);
+        collider.enabled = true;
+        sprite.enabled = true;
+
+
+        
+        transform.position = new Vector3(0, 0, 0);
+        RigidBody.velocity = new Vector2(0, 0);
+
+        if (GameManager.instance.vida <= 0)
+        {
+            gameObject.SetActive(false);
+
+
+        }
+
+    }
+
+}
+
 

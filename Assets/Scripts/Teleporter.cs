@@ -17,8 +17,7 @@ public class Teleporter : MonoBehaviour
     {
         if (transform.position.y > limiteY)
         {
-            transform.position = new Vector3(transform.position.x, -limiteY);  /*para el teletransporte creamos un nuevo Vector3 y le decimos que la posicion X la mantenemos y como estamos trabajando con el eje Y le añadimos el nuevo valor lo mismo con el limite de abajo que pasa de negativo a positivo*/
-         
+            transform.position = new Vector3(transform.position.x, -limiteY);           
         }
         if (transform.position.y < -limiteY)
         {

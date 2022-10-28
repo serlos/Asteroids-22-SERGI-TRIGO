@@ -6,30 +6,44 @@ public class BulletController : MonoBehaviour
 {
     Rigidbody2D rb;
     public float speed = 10;
+    public float duracionBala = 1.0f;
+    public bool soyAleatorio = false;   
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.AddForce(transform.up * speed); //transform.add nos da la direccion en la que el objeto está rotado, el vector gira con la rotacion del objeto actual
+        rb.AddForce(transform.up * speed);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision) //funcion ontrigger nos la da unity y nos dice q cualquier cosa que entre en nuestro trigger nos dira que ha entrado
-    {
-        if (collision.tag == "Asteroid") //con un = dice que algo contiene algo, si ponemos 2 es para comparar
+        duracionBala -= Time.deltaTime;
+        if (duracionBala <= 0.0f) 
         {
-            collision.GetComponent<AsteroideController>().Muerte();  //pillamos la funcion de ASteroide Controller y asi le decimos que el astoroide se destruye
+            if (!soyAleatorio) 
+            {
+                GameManager.instance.listaBalas.Remove(this.gameObject);
+            }
             Destroy(gameObject);
-        
-        } 
-        
-
-      
-
+        }
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "Asteroid") 
+        {
+            collision.gameObject.GetComponent<AsteroideController>().Muerte();
+            GameManager.instance.listaBalas.Remove(this.gameObject);
+            Destroy(gameObject);
+            GameManager.instance.municion += 2;
+        
+        }
+    }
+
+   
+
+
+
+
 } 

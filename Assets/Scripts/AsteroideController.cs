@@ -12,19 +12,23 @@ public class AsteroideController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        Vector2 direccion = new Vector2(Random.Range (-1f,1f), Random.Range(-1f,1f)); // este random.range me pasa un numero aleatorio entre los dos floats que le indicamos, este caso -1 y 1
-        Debug.Log(direccion); 
-        direccion = direccion * Random.Range(speed_min, speed_max); // para modificar la direccion (el largo del vector para especificar que vamos mas rapidos o mas lentos) multiplicamos y le decimos que son esos dos public para modificar desde fuera
-        rb.AddForce(direccion); // le añadimos fuerza para que se mueva 
+        Vector2 direccion = new Vector2(Random.Range (-1f,1f), Random.Range(-1f,1f));  
+        direccion = direccion * Random.Range(speed_min, speed_max); 
+        rb.AddForce(direccion);
+        //manager.asteroides += 1;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (manager.limpiar)
+        {
+            Destroy(this.gameObject);
+
+        }
     }
 
-    public void Muerte()  // funciones siempre van fuera de otras funciones y si pones void es q no queremos una respuesta, que no nos devuelva nada
+    public void Muerte()  
     {
         if (transform.localScale.x > 0.25)
         {
@@ -36,19 +40,20 @@ public class AsteroideController : MonoBehaviour
         GameObject temp2 = Instantiate(manager.asteroide, transform.position, transform.rotation);
         temp2.GetComponent <AsteroideController>().manager = manager;
         temp2.transform.localScale = transform.localScale * 0.5f;
+        manager.asteroides += 2;
         
-        }
 
+        }
+        GameManager.instance.puntuacion += 100;
+        manager.asteroides -= 1;
         Destroy(gameObject);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision) //funcion ontrigger nos la da unity y nos dice q cualquier cosa que entre en nuestro trigger nos dira que ha entrado
+    private void OnTriggerEnter2D(Collider2D collision) 
     {
-        if (collision.tag == "Player") //con un = dice que algo contiene algo, si ponemos 2 es para comparar
+       if (collision.tag == "Player") 
         {
-            collision.GetComponent<PlayerMovement>().Muerte();  //pillamos la funcion de PlayerMovement y asi le decimos que morimos cuando nos chocamos con el asteroide
-
+            collision.gameObject.GetComponent<PlayerMovement>().Muerte();
         }
     }
-
 }
